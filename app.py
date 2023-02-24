@@ -10,7 +10,7 @@ def m():
 @app.route('/company_results',methods=['POST'])
 def company_results():
     if request.method=='POST':
-        company_name=request.form('company-name')
+        company_name=request.form['company-name']
         base_url='https://www.linkedin.com/search/results/all/?keywords='
         company_linkedin_search_url=base_url+company_name
         return company_linkedin_search_url
