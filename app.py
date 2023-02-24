@@ -2,6 +2,7 @@ from flask import Flask,render_template,request,jsonify
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen
 app = Flask(__name__)
+import pymongo
 
 @app.route('/',methods=['POST','GET'])
 def m():
@@ -10,7 +11,7 @@ def m():
 @app.route('/review',methods=['POST'])
 def company_results():
     if request.method=='POST':
-        post_query=request.form['post_query']
+        post_query=request.form['post_query'].replace(" ","")
         base_url='https://www.reddit.com/search/?q='
         post_search_url=base_url+post_query
         #check if no results
@@ -38,6 +39,11 @@ def company_results():
                     final_comments=divs_containing_posts[i].findAll('span',{'class':'_vaFo96phV6L5Hltvwcox'})[1].text
                 mydict = {"Title":title_of_the_current_post, "Comment":comments_of_current_post, "Upvotes": post_upvotes, "Link": post_link}
                 reviews.append(mydict)
+        #Storing in mongo-db        
+        client = pymongo.MongoClient("mongodb+srv://archit:archit@cluster0.nd7lykz.mongodb.net/?retryWrites=true&w=majority")
+        db = client.test
+        review_col=db['review_scrap_data']
+        review_col.insert_many(reviews)
         return render_template('result.html', reviews=reviews[0:(len(reviews)-1)])
 
 if __name__=="__main__":
